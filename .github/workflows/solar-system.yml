@@ -6,28 +6,67 @@ on:
     branches:
       - main
       - 'feature/*'
+env:
+  MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'    
+  MONGO_USERNAME: ${{vars.MONGO_USERNAME}}  
+  MONGO_PASSWORD: ${{secrets.MONGO_PASSWORD}}
     
 jobs:
     unit-testing:
         name: Unit Testing
-        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+           nodejs_version: [18,19,20] 
+           operating_ststems: [ubuntu-latest,macos-latest]
+           exclude:
+             - nodejs_version: 18
+               operating_ststems: macos-latest
+        runs-on: ${{matrix.operating_ststems}}
         steps:
         - name: Checkout Repository
           uses: actions/checkout@v4
 
-        - name: Setup NodeJS Version
+        - name: Setup NodeJS Version - ${{matrix.nodejs_version}}
           uses: actions/setup-node@v3
           with:
-            node-version: 20
+            node-version: ${{matrix.nodejs_version}}
     
         - name: Install Dependencies
           run: npm install
     
         - name: Unit Testing
+          id: nodejs-unit_testing-step
           run: npm test
           
         - name: Archive Test Result
-          uses: actions/upload-artifact@v3
+          if: steps.nodejs-unit_testing-step.outcome == 'failure' || steps.nodejs-unit_testing-step.outcome == 'success'
+          uses: actions/upload-artifact@v4
           with:
-            name: Mocha-Test-Result
+            name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_ststems }}-${{ github.run_number }}
             path: test-results.xml
+    code-coverage:
+        name: Code Coverage
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v4
+
+          - name: Setup NodeJS Version - 18
+            uses: actions/setup-node@v3
+            with:
+             node-version: 18
+
+          - name: Install Dependencies
+            run: npm install
+
+          - name: Check Code Coverage
+            continue-on-error: true
+            run: npm run coverage
+
+          - name: Archive Test Result
+            uses: actions/upload-artifact@v4
+            with:
+               name: Code-Coverage-Result
+               path: coverage
+               retention-days: 5
+               

@@ -16,7 +16,7 @@ jobs:
         name: Unit Testing
         strategy:
           matrix:
-           nodejs_version: [18,19,20] 
+           nodejs_version: [18,20] 
            operating_ststems: [ubuntu-latest,macos-latest]
            exclude:
              - nodejs_version: 18
@@ -30,7 +30,13 @@ jobs:
           uses: actions/setup-node@v3
           with:
             node-version: ${{matrix.nodejs_version}}
-    
+
+        - name: cache NPM Dependencies
+          uses: actions/cache@v3
+          with:
+            path: node_modules
+            key: ${{runner.os}}-node-modules-${{hashFiles('package-lock.json')}}
+
         - name: Install Dependencies
           run: npm install
     
@@ -55,6 +61,12 @@ jobs:
             uses: actions/setup-node@v3
             with:
              node-version: 18
+
+          - name: cache NPM Dependencies
+            uses: actions/cache@v3
+            with:
+               path: mode_modules
+               key: ${{runner.os}}-node-modules-${{hashFiles('package-lock.json')}}   
 
           - name: Install Dependencies
             run: npm install

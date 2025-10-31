@@ -116,7 +116,7 @@ jobs:
               abdelkarim3/solar-systems:${{ github.sha }}
 
               export IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' solar-systems-app)
-              echo IP
+              echo $IP
               echo Testing Image URL using wget
               wget -q -O - 127.0.0.1:3000/live | grep live
 

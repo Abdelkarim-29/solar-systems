@@ -102,7 +102,7 @@ jobs:
              context: .
              push: false
              tags: |
-               abdelkarim3/solar-systems:latest
+               abdelkarim3/solar-systems:${{ github.sha }}
                
 
           - name: Docker Image Test

@@ -183,6 +183,7 @@ jobs:
               kubectl version --client=true    
               echo ====================================
               kubectl get nodes
+              
 
 
 

@@ -162,7 +162,7 @@ jobs:
 
     dev-deploy:
       needs: docker
-      runs-on: self-
+      runs-on: self-hosted
       steps:
           - name: Checkout Repository
             uses: actions/checkout@v4

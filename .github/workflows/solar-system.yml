@@ -60,17 +60,30 @@ jobs:
           with:
             name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_ststems }}-${{ github.run_number }}
             path: test-results.xml
+
     code-coverage:
         name: Code Coverage
+        container: 
+          image: node:18
+        services:
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            options: 
+              --name mongo
+        env:
+          MONGO_URI: 'mongodb+srv://mongo:27017/superData'    
+          MONGO_USERNAME: non-prod-username
+          MONGO_PASSWORD: non-prod-password           
         runs-on: ubuntu-latest
+
         steps:
           - name: Checkout Repository
             uses: actions/checkout@v4
 
-          - name: Setup NodeJS Version - 18
-            uses: actions/setup-node@v3
-            with:
-             node-version: 18
+         # - name: Setup NodeJS Version - 18
+         #   uses: actions/setup-node@v3
+         #   with:
+         #    node-version: 18
 
           - name: cache NPM Dependencies
             uses: actions/cache@v3

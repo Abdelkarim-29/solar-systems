@@ -14,10 +14,19 @@ env:
 jobs:
     unit-testing:
         name: Unit Testing
+        services:
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            ports:
+              - 27017:27017
+        env:
+          MONGO_URI: 'mongodb+srv://localhost:27017/superData'    
+          MONGO_USERNAME: non-prod-username
+          MONGO_PASSWORD: non-prod-password 
         strategy:
           matrix:
            nodejs_version: [18,20] 
-           operating_ststems: [ubuntu-latest,macos-latest]
+           operating_ststems: [ubuntu-latest]
            exclude:
              - nodejs_version: 18
                operating_ststems: macos-latest
@@ -51,17 +60,30 @@ jobs:
           with:
             name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_ststems }}-${{ github.run_number }}
             path: test-results.xml
+
     code-coverage:
         name: Code Coverage
+        container: 
+          image: node:18
+        services:
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            options: 
+              --name mongo
+        env:
+          MONGO_URI: 'mongodb+srv://mongo:27017/superData'    
+          MONGO_USERNAME: non-prod-username
+          MONGO_PASSWORD: non-prod-password           
         runs-on: ubuntu-latest
+
         steps:
           - name: Checkout Repository
             uses: actions/checkout@v4
 
-          - name: Setup NodeJS Version - 18
-            uses: actions/setup-node@v3
-            with:
-             node-version: 18
+         # - name: Setup NodeJS Version - 18
+         #   uses: actions/setup-node@v3
+         #   with:
+         #    node-version: 18
 
           - name: cache NPM Dependencies
             uses: actions/cache@v3
@@ -85,6 +107,8 @@ jobs:
     docker:
        name: contaierization
        needs: [unit-testing, code-coverage]
+       permissions: 
+        packages: write
        runs-on: ubuntu-latest
        steps:
           - name: Checkout Repository
@@ -95,4 +119,71 @@ jobs:
             with: 
               username: ${{vars.DOCKERHUB_USERNAME}}
               password: ${{secrets.DOCKERHUB_PASSWORD}}    
+
+          - name: GHCR login
+            uses: docker/login-action@v2.2.0
+            with: 
+              registry: ghcr.io
+              username: ${{github.repository_owner}}
+              password: ${{secrets.GITHUB_TOKEN}}      
                
+          - name: Docker Build For Testing
+            uses: docker/build-push-action@v4
+            with:
+             context: .
+             push: false
+             tags: |
+               abdelkarim3/solar-systems:${{ github.sha }}
+               
+
+          - name: Docker Image Test
+            run: |
+              docker images
+              docker run --name solar-systems-app -d \
+              -p 3000:3000 \
+              -e MONGO_URI=$MONGO_URI \
+              -e MONGO_USERNAME=$MONGO_USERNAME \
+              -e MONGO_PASSWORD=$MONGO_PASSWORD \
+              abdelkarim3/solar-systems:${{ github.sha }}
+
+              export IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' solar-systems-app)
+              echo $IP
+              echo Testing Image URL using wget
+              wget -q -O - 127.0.0.1:3000/live | grep live
+
+          - name: Docker Registry Push
+            uses: docker/build-push-action@v4
+            with:
+             context: .
+             push: true
+             tags: |
+               abdelkarim3/solar-systems:${{ github.sha }}
+               ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
+
+    dev-deploy:
+      needs: docker
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v4
+
+          - name: Install kubectl CLI  
+            uses: azure/setup-kubectl@v4
+            with:
+              version: 'latest'  
+           
+          - name: Set Kubeconfig file
+            uses: azure/k8s-set-context@v4
+            with:
+              method: kubeconfig
+              kubeconfig: ${{secrets.KUBECONFIG}}    
+              
+          - name: Fetch kubernetes Cluster Details
+            run: |
+              kubectl version --client=true    
+              echo ====================================
+              kubectl get nodes
+
+
+
+

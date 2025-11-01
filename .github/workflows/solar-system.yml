@@ -134,6 +134,6 @@ jobs:
              push: true
              tags: |
                abdelkarim3/solar-systems:${{ github.sha }}
-               ghcr.io/abdelkarim-29:${{ github.sha }}    
+               ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}    
 
 

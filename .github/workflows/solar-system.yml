@@ -162,7 +162,7 @@ jobs:
 
     dev-deploy:
       needs: docker
-      runs-on: self-hosted
+      runs-on: ubuntu-latest
       steps:
           - name: Checkout Repository
             uses: actions/checkout@v4
@@ -180,6 +180,8 @@ jobs:
               
           - name: Fetch kubernetes Cluster Details
             run: |
+              mkdir -p $HOME/.kube
+              echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
               kubectl version --client=true    
               echo ====================================
               kubectl get nodes

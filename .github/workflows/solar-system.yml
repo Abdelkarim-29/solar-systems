@@ -202,9 +202,9 @@ jobs:
             run: |
              cat kubernetes/development/*.yaml
 
-          - name: Fix replicas type
-            run: |
-              sed -i 's/replicas: "\(.*\)"/replicas: \1/' kubernetes/development/deployment.yaml
+          #- name: Fix replicas type
+          #  run: |
+          #    sed -i 's/replicas: "\(.*\)"/replicas: \1/' kubernetes/development/deployment.yaml
 
           - name: Create development namespace if not exists
             run: |

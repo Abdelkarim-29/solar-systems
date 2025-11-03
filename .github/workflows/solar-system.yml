@@ -186,7 +186,7 @@ jobs:
            
           - name: Save Nginx Ingress controller IP as GITHUB Env Variable
             run: |
-              echo "INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath="{.status.loadblancer.ingress[0.ip]}")"  >> $GITHUB_ENV  
+              echo "INGRESS_IP=$(kubectl -n ingress-nginx get services ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")"  >> $GITHUB_ENV  
           - name: Replace Token in Manifest files
             uses: cschleiden/replace-tokens@v1
             with:
@@ -201,7 +201,7 @@ jobs:
           - name: Chech files
             run: |
              cat kubernetes/development/*.yaml
-               
+
 
 
 

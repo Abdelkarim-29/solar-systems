@@ -187,6 +187,7 @@ jobs:
           - name: Save Nginx Ingress controller IP as GITHUB Env Variable
             run: |
               echo "INGRESS_IP=$(minikube ip)" >> $GITHUB_ENV
+
           - name: Replace Token in Manifest files
             uses: cschleiden/replace-tokens@v1
             with:
@@ -196,7 +197,7 @@ jobs:
             env:
                NAMESPACE: ${{vars.NAMESPACE}}
                REPLICAS: ${{vars.REPLICAS}}  
-               IMAGE: ${{vars.DOCKERHUB_USERNAME}}/solar-systems:${{ github.sha }}
+               IMAGE: abdelkarim3/solar-systems:${{ github.sha }}
                INGRESS_IP: ${{env.INGRESS_IP}}
           - name: Chech files
             run: |

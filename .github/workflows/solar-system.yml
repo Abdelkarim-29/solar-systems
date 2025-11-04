@@ -244,7 +244,7 @@ jobs:
           run: |
             echo $URL
             echo "---------------------------------------------------------------"  
-             echo "Raw response:"
+            echo "Raw response:"
             curl -s -k https://$URL/live
             echo "---------------------------------------------------------------"   
             curl https://$URL/live -s -k | jq -r .status | grep -i live

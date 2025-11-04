@@ -46,7 +46,6 @@ jobs:
             path: node_modules
             key: ${{runner.os}}-node-modules-${{hashFiles('package-lock.json')}}
             
-
         - name: Install Dependencies
           run: npm install
     
@@ -104,6 +103,7 @@ jobs:
                name: Code-Coverage-Result
                path: coverage
                retention-days: 5
+
     docker:
        name: contaierization
        needs: [unit-testing, code-coverage]
@@ -236,12 +236,11 @@ jobs:
             run: |
              echo "APP_INGRESS_HOST=$(kubectl -n ${{vars.NAMESPACE}} get ingress -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_OUTPUT
              
-    integration-Testing:
+    Dev-integration-Testing:
       name: Dev integration Testing    
       needs: dev-deploy
       runs-on: self-hosted
       steps:
-      
         - name: Test URL Output using CURL and JQ
           env:
             URL: ${{  needs.dev-deploy.outputs.APP_INGRESS_URL}}
@@ -250,9 +249,91 @@ jobs:
             echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
 
+    Prod-deploy:
+      needs: Dev-integration-Testing
+      environment: 
+        name: production
+        url: https://${{ steps.set-ingress-host-address.outputs.APP_INGRESS_HOST }}
+      outputs:
+        APP_INGRESS_URL: ${{ steps.set-ingress-host-address.outputs.APP_INGRESS_HOST }}
+      runs-on: self-hosted
+      steps:
+          - name: Checkout Repository
+            uses: actions/checkout@v4
 
+          - name: Install kubectl CLI  
+            uses: azure/setup-kubectl@v4
+            with:
+              version: 'latest'  
+           
+          - name: Set Kubeconfig file
+            uses: azure/k8s-set-context@v4
+            with:
+              method: kubeconfig
+              kubeconfig: ${{secrets.KUBECONFIG}}    
+              
+          - name: Fetch kubernetes Cluster Details
+            run: |
+              kubectl version --client=true    
+              echo ====================================
+              kubectl get nodes
+           
+          - name: Save Nginx Ingress controller IP as GITHUB Env Variable
+            run: |
+              echo "INGRESS_IP=$(minikube ip)" >> $GITHUB_ENV
 
+          - name: Replace Token in Manifest files
+            uses: cschleiden/replace-tokens@v1
+            with:
+              tokenPrefix: '_{_'
+              tokenSuffix: '_}_'
+              files: '["kubernetes/production/*.yaml"]'
+            env:
+               NAMESPACE: ${{vars.NAMESPACE}}
+               REPLICAS: ${{vars.REPLICAS}}  
+               IMAGE: abdelkarim3/solar-systems:${{ github.sha }}
+               INGRESS_IP: ${{env.INGRESS_IP}}
 
+          - name: Check files
+            run: |
+             cat kubernetes/production/*.yaml
 
+          - name: Fix replicas type
+            run: |
+             sed -i 's/replicas: "\(.*\)"/replicas: \1/' kubernetes/production/deployment.yaml
 
+          - name: Create development namespace if not exists
+            run: |
+             kubectl get ns production || kubectl create ns production
+  
+          - name: Create MongoDB Scretes
+            run: |
+             kubectl -n ${{vars.NAMESPACE}} create secret generic mongo-db-creds \
+             --from-literal=MONGO_URI=${{env.MONGO_URI}} \
+             --from-literal=MONGO_USERNAME=${{env.MONGO_USERNAME}} \
+             --from-literal=MONGO_PASSWORD=${{secrets.MONGO_PASSWORD}} \
+             --save-config \
+             --dry-run=client \
+             -o yaml | kubectl apply -f -
 
+          - name: Deploy to PROD ENV
+            run: |
+             kubectl apply -f kubernetes/production 
+
+          - name: Set App Ingress Host URL   
+            id: set-ingress-host-address
+            run: |
+             echo "APP_INGRESS_HOST=$(kubectl -n ${{vars.NAMESPACE}} get ingress -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_OUTPUT
+             
+    Prod-integration-Testing:
+      name: Prod integration Testing    
+      needs: Prod-deploy
+      runs-on: self-hosted
+      steps:
+        - name: Test URL Output using CURL and JQ
+          env:
+            URL: ${{  needs.Prod-deploy.outputs.APP_INGRESS_URL}}
+          run: |
+            echo $URL
+            echo "---------------------------------------------------------------"    
+            curl https://$URL/live -s -k | jq -r .status | grep -i live

@@ -11,24 +11,18 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/')));
 app.use(cors())
 
-
-const mongoose = require('mongoose');
-
-mongoose.connect(
-  'mongodb+srv://superuser:SuperPassword@supercluster.d83jj.mongodb.net/superData?retryWrites=true&w=majority',
-  {
+mongoose.connect('mongodb+srv://supercluster.d83jj.mongodb.net/superData', {
+    user: 'superuser' ,
+    pass: 'SuperPassword' ,
     useNewUrlParser: true,
     useUnifiedTopology: true
-  },
-  function(err) {
+}, function(err) {
     if (err) {
-        console.log("error!! " + err);
+        console.log("error!! " + err)
     } else {
-        console.log("MongoDB Connection Successful");
+      //  console.log("MongoDB Connection Successful")
     }
-  }
-);
-
+})
 
 var Schema = mongoose.Schema;
 

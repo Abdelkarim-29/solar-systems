@@ -161,7 +161,7 @@ jobs:
                ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
 
     dev-deploy:
-      if: contains(github.ref,'feature/')
+      if: if: github.ref == 'refs/heads/main'
       needs: docker
       environment: 
         name: development
@@ -238,7 +238,7 @@ jobs:
              echo "APP_INGRESS_HOST=$(kubectl -n ${{vars.NAMESPACE}} get ingress -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_OUTPUT
              
     Dev-integration-Testing:
-      if: contains(github.ref,'feature/')
+      if: github.ref == 'refs/heads/main'
       name: Dev integration Testing    
       needs: dev-deploy
       runs-on: self-hosted

@@ -30,12 +30,12 @@ jobs:
            exclude:
              - nodejs_version: 18
                operating_ststems: macos-latest
-        runs-on: ${{matrix.operating_ststems}}
+        runs-on: ${{ matrix.operating_ststems }}
         steps:
         - name: Checkout Repository
           uses: actions/checkout@v4
 
-        - name: Setup NodeJS Version - ${{matrix.nodejs_version}}
+        - name: Setup NodeJS Version - ${{ matrix.nodejs_version }}
           uses: actions/setup-node@v3
           with:
             node-version: ${{matrix.nodejs_version}}

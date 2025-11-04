@@ -161,7 +161,7 @@ jobs:
                ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
 
     dev-deploy:
-      if: if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main'
       needs: docker
       environment: 
         name: development

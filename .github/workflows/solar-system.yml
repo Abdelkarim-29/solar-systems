@@ -161,7 +161,7 @@ jobs:
                ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
 
     dev-deploy:
-      if: github.ref == 'refs/heads/main'
+      if: contains(github.ref,'feature/')
       needs: docker
       environment: 
         name: development
@@ -182,7 +182,7 @@ jobs:
             uses: azure/k8s-set-context@v4
             with:
               method: kubeconfig
-              kubeconfig: ${{secrets.KUBECONFIG}}    
+              kubeconfig: ${{ secrets.KUBECONFIG }}    
               
           - name: Fetch kubernetes Cluster Details
             run: |
@@ -238,7 +238,7 @@ jobs:
              echo "APP_INGRESS_HOST=$(kubectl -n ${{vars.NAMESPACE}} get ingress -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_OUTPUT
              
     Dev-integration-Testing:
-      if: github.ref == 'refs/heads/main'
+      if: contains(github.ref,'feature/')
       name: Dev integration Testing    
       needs: dev-deploy
       runs-on: self-hosted
@@ -252,7 +252,7 @@ jobs:
             curl https://$URL/live -s -k | jq -r .status | grep -i live
 
     Prod-deploy:
-      if: contains(github.ref,'feature/')
+      if: github.ref == 'refs/heads/main'
       needs: docker
       environment: 
         name: production
@@ -329,7 +329,7 @@ jobs:
              echo "APP_INGRESS_HOST=$(kubectl -n ${{vars.NAMESPACE}} get ingress -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_OUTPUT
              
     Prod-integration-Testing:
-      if: contains(github.ref,'feature/')
+      if: github.ref == 'refs/heads/main'
       name: Prod integration Testing    
       needs: Prod-deploy
       runs-on: self-hosted

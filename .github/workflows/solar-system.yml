@@ -8,7 +8,7 @@ on:
       - 'feature/*'
 env:
   MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'    
-  MONGO_USERNAME: ${{vars.MONGO_USERNAME}}  
+  MONGO_USERNAME: ${{vars.MONGO_USERNAME}}
   MONGO_PASSWORD: ${{secrets.MONGO_PASSWORD}}
     
 jobs:
@@ -163,79 +163,7 @@ jobs:
     dev-deploy:
       if: contains(github.ref,'feature/')
       needs: docker
-      environment: 
-        name: development
-        url: https://${{ steps.set-ingress-host-address.outputs.APP_INGRESS_HOST }}
-      outputs:
-        APP_INGRESS_URL: ${{ steps.set-ingress-host-address.outputs.APP_INGRESS_HOST }}
-      runs-on: self-hosted
-      steps:
-          - name: Checkout Repository
-            uses: actions/checkout@v4
-
-          - name: Install kubectl CLI  
-            uses: azure/setup-kubectl@v4
-            with:
-              version: 'latest'  
-           
-          - name: Set Kubeconfig file
-            uses: azure/k8s-set-context@v4
-            with:
-              method: kubeconfig
-              kubeconfig: ${{ secrets.KUBECONFIG }}    
-              
-          - name: Fetch kubernetes Cluster Details
-            run: |
-              kubectl version --client=true    
-              echo ====================================
-              kubectl get nodes
-           
-          - name: Save Nginx Ingress controller IP as GITHUB Env Variable
-            run: |
-              echo "INGRESS_IP=$(minikube ip)" >> $GITHUB_ENV
-
-          - name: Replace Token in Manifest files
-            uses: cschleiden/replace-tokens@v1
-            with:
-              tokenPrefix: '_{_'
-              tokenSuffix: '_}_'
-              files: '["kubernetes/development/*.yaml"]'
-            env:
-               NAMESPACE: ${{vars.NAMESPACE}}
-               REPLICAS: ${{vars.REPLICAS}}  
-               IMAGE: abdelkarim3/solar-systems:${{ github.sha }}
-               INGRESS_IP: ${{env.INGRESS_IP}}
-
-          - name: Check files
-            run: |
-             cat kubernetes/development/*.yaml
-
-          - name: Fix replicas type
-            run: |
-             sed -i 's/replicas: "\(.*\)"/replicas: \1/' kubernetes/development/deployment.yaml
-
-          - name: Create development namespace if not exists
-            run: |
-             kubectl get ns development || kubectl create ns development
-  
-          - name: Create MongoDB Scretes
-            run: |
-             kubectl -n ${{vars.NAMESPACE}} create secret generic mongo-db-creds \
-             --from-literal=MONGO_URI=${{env.MONGO_URI}} \
-             --from-literal=MONGO_USERNAME=${{env.MONGO_USERNAME}} \
-             --from-literal=MONGO_PASSWORD=${{secrets.MONGO_PASSWORD}} \
-             --save-config \
-             --dry-run=client \
-             -o yaml | kubectl apply -f -
-
-          - name: Deploy to Dev ENV
-            run: |
-             kubectl apply -f kubernetes/development  
-
-          - name: Set App Ingress Host URL   
-            id: set-ingress-host-address
-            run: |
-             echo "APP_INGRESS_HOST=$(kubectl -n ${{vars.NAMESPACE}} get ingress -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_OUTPUT
+      uses: ./.github/workflows/reuse-deployment.yml
              
     Dev-integration-Testing:
       if: contains(github.ref,'feature/')

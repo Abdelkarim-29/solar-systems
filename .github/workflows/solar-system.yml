@@ -20,7 +20,7 @@ jobs:
             ports:
               - 27017:27017
         env:
-          MONGO_URI: 'mongodb+srv://localhost:27017/superData'    
+          MONGO_URI: 'mongodb://localhost:27017/superData'    
           MONGO_USERNAME: non-prod-username
           MONGO_PASSWORD: non-prod-password
         strategy:
@@ -32,9 +32,6 @@ jobs:
                operating_ststems: macos-latest
         runs-on: ${{ matrix.operating_ststems }}
         steps:
-        - name: Debug Mongo URI
-          run: |
-           echo "MONGO_URI value: $MONGO_URI"
         - name: Checkout Repository
           uses: actions/checkout@v4
 
@@ -51,6 +48,15 @@ jobs:
             
         - name: Install Dependencies
           run: npm install
+           
+        - name: Wait for MongoDB to be ready
+          run: |
+             echo "⏳ Waiting for MongoDB to start..."
+             for i in {1..10}; do
+             nc -z localhost 27017 && echo "✅ MongoDB is up!" && break
+             echo "MongoDB not ready yet... retrying ($i/10)"
+             sleep 3
+             done
     
         - name: Unit Testing
           id: nodejs-unit_testing-step

@@ -21,8 +21,8 @@ jobs:
               - 27017:27017
         env:
           MONGO_URI: 'mongodb://localhost:27017/superData'    
-          MONGO_USERNAME: non-prod-username
-          MONGO_PASSWORD: non-prod-password
+          MONGO_USERNAME: non-prod-user
+          MONGO_PASSWORD: non-prod-pass
         strategy:
           matrix:
            nodejs_version: [18,20] 

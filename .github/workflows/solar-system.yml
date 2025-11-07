@@ -197,7 +197,7 @@ jobs:
      with:
         mongodb_uri: ${{ vars.MONGO_URI }} 
         environment: Production    
-        kubernetes/development: kubernetes/production/
+        k8s-manifest-dir: kubernetes/production/
         namespace: production
 
              

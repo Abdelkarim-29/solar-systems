@@ -19,6 +19,8 @@ jobs:
             image: siddharth67/mongo-db:non-prod
             ports:
               - 27017:27017
+            options: >-
+          --name mongo-db  
         env:
           MONGO_URI: mongodb://mongo-db:27017/superData
           MONGO_USERNAME: non-prod-username
@@ -58,6 +60,8 @@ jobs:
             echo "MongoDB not ready yet... retrying ($i/15)"
             sleep 3
             done  
+            echo "❌ MongoDB failed to start in time."
+            exit 1                   
     
         - name: Unit Testing
           id: nodejs-unit_testing-step

@@ -48,6 +48,16 @@ jobs:
             
         - name: Install Dependencies
           run: npm install
+
+        
+        - name: Wait for MongoDB to be ready
+          run: |
+            echo "⏳ Waiting for MongoDB to start..."
+            for i in {1..15}; do
+            nc -z mongo-db 27017 && echo "✅ MongoDB is up!" && break
+            echo "MongoDB not ready yet... retrying ($i/15)"
+            sleep 3
+            done  
     
         - name: Unit Testing
           id: nodejs-unit_testing-step

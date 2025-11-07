@@ -177,7 +177,7 @@ jobs:
       steps:
         - name: Test URL Output using CURL and JQ
           env:
-            URL: ${{  needs.dev-deploy.outputs.APP_INGRESS_URL}}
+            URL: ${{ needs.dev-deploy.outputs.application_url }}
           run: |
             echo $URL
             echo "---------------------------------------------------------------"    
@@ -194,7 +194,8 @@ jobs:
         environment: Production    
         k8s-manifest-dir: kubernetes/production/
         namespace: production
-           
+
+             
     Prod-integration-Testing:
       if: github.ref == 'refs/heads/main'
       name: Prod integration Testing    
@@ -203,14 +204,8 @@ jobs:
       steps:
         - name: Test URL Output using CURL and JQ
           env:
-            URL: ${{  needs.Prod-deploy.outputs.APP_INGRESS_URL}}
+            URL: ${{  needs.Prod-deploy.outputs.application_url }}
           run: |
             echo $URL
             echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
-            
-
-
-
-            
-            

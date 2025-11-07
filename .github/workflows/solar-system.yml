@@ -52,7 +52,9 @@ jobs:
                  
         - name: Unit Testing
           id: nodejs-unit_testing-step
-          run: npm test
+          run: |
+            echo "🏁 Running Mocha tests..."
+            npm test || (echo "❌ Tests failed!" && cat test-results.xml && exit 1)
           
         - name: Archive Test Result
           if: always()

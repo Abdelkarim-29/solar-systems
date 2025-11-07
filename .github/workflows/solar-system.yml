@@ -7,13 +7,22 @@ on:
       - main
       - 'feature/*'
 env:
-  MONGO_URI: 'mongodb://supercluster-shard-00-00.d83jj.mongodb.net:27017,supercluster-shard-00-01.d83jj.mongodb.net:27017,supercluster-shard-00-02.d83jj.mongodb.net:27017/superData?authSource=admin&replicaSet=atlas-11b0vt-shard-0&ssl=true' 
+  MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'    
   MONGO_USERNAME: ${{vars.MONGO_USERNAME}}
   MONGO_PASSWORD: ${{secrets.MONGO_PASSWORD}}
     
 jobs:
     unit-testing:
         name: Unit Testing
+        services:
+          mongo-db:
+            image: siddharth67/mongo-db:non-prod
+            ports:
+              - 27017:27017
+        env:
+          MONGO_URI: 'mongodb+srv://localhost:27017/superData'    
+          MONGO_USERNAME: non-prod-username
+          MONGO_PASSWORD: non-prod-password
         strategy:
           matrix:
            nodejs_version: [18,20] 
@@ -39,7 +48,7 @@ jobs:
             
         - name: Install Dependencies
           run: npm install
-             
+    
         - name: Unit Testing
           id: nodejs-unit_testing-step
           run: npm test
@@ -139,7 +148,6 @@ jobs:
               echo $IP
               echo Testing Image URL using wget
               wget -q -O - 127.0.0.1:3000/live | grep live
-
           - name: Docker Registry Push
             uses: docker/build-push-action@v4
             with:
@@ -148,7 +156,6 @@ jobs:
              tags: |
                abdelkarim3/solar-systems:${{ github.sha }}
                ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
-
     dev-deploy:
       if: contains(github.ref,'feature/')
       needs: docker
@@ -175,7 +182,6 @@ jobs:
             echo $URL
             echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
-
     Prod-deploy:
      if: github.ref == 'refs/heads/main'
      needs: docker
@@ -198,10 +204,8 @@ jobs:
       steps:
         - name: Test URL Output using CURL and JQ
           env:
-            URL: ${{ needs.Prod-deploy.outputs.application_url }}
+            URL: ${{  needs.Prod-deploy.outputs.application_url }}
           run: |
             echo $URL
             echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
-
-            

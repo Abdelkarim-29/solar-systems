@@ -7,7 +7,7 @@ on:
       - main
       - 'feature/*'
 env:
-  MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'    
+  MONGO_URI: 'mongodb://supercluster-shard-00-00.d83jj.mongodb.net:27017,supercluster-shard-00-01.d83jj.mongodb.net:27017,supercluster-shard-00-02.d83jj.mongodb.net:27017/superData?authSource=admin&replicaSet=atlas-11b0vt-shard-0&ssl=true' 
   MONGO_USERNAME: ${{vars.MONGO_USERNAME}}
   MONGO_PASSWORD: ${{secrets.MONGO_PASSWORD}}
     

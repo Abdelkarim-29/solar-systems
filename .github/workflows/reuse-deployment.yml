@@ -79,7 +79,7 @@ jobs:
 
       - name: Fix replicas type
         run: |
-         sed -i 's/replicas: "\(.*\)"/replicas: \1/' kubernetes/${{ inputs.k8s-manifest-dir }}/deployment.yaml
+         sed -i 's/replicas: "\(.*\)"/replicas: \1/' ${{ inputs.k8s-manifest-dir }}/deployment.yaml
 
       - name: Create development namespace if not exists
         run: |
@@ -104,4 +104,3 @@ jobs:
         run: |
           echo "APP_INGRESS_HOST=$(kubectl -n ${{vars.NAMESPACE}} get ingress -o jsonpath='{.items[0].spec.tls[0].hosts[0]}')" >> $GITHUB_OUTPUT            
 
-          

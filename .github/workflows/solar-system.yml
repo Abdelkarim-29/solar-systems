@@ -22,7 +22,7 @@ jobs:
             options: >-
                --name mongo-db  
         env:
-          MONGO_URI: mongodb://mongo-db:27017/superData
+          MONGO_URI: 'mongodb+srv://localhost:27017/superData'
           MONGO_USERNAME: non-prod-username
           MONGO_PASSWORD: non-prod-password
         strategy:

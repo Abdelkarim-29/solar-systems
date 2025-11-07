@@ -21,8 +21,8 @@ jobs:
               - 27017:27017
                --name mongo-db  
         env:
-          MONGO_URI: 'mongodb+srv://localhost:27017/superData'
-          MONGO_USERNAME: non-prod-username
+          MONGO_URI: 'mongodb33://localhost:27017/superData'
+          MONGO_USERNAME: non-prod-user
           MONGO_PASSWORD: non-prod-password
         strategy:
           matrix:
@@ -149,6 +149,7 @@ jobs:
               echo $IP
               echo Testing Image URL using wget
               wget -q -O - 127.0.0.1:3000/live | grep live
+
           - name: Docker Registry Push
             uses: docker/build-push-action@v4
             with:

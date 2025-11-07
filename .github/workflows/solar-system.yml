@@ -20,7 +20,7 @@ jobs:
             ports:
               - 27017:27017
             options: >-
-          --name mongo-db  
+               --name mongo-db  
         env:
           MONGO_URI: mongodb://mongo-db:27017/superData
           MONGO_USERNAME: non-prod-username

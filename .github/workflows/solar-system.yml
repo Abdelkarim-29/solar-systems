@@ -32,6 +32,9 @@ jobs:
                operating_ststems: macos-latest
         runs-on: ${{ matrix.operating_ststems }}
         steps:
+        - name: Debug Mongo URI
+          run: |
+            صصecho "MONGO_URI value: $MONGO_URI"
         - name: Checkout Repository
           uses: actions/checkout@v4
 
@@ -148,6 +151,7 @@ jobs:
               echo $IP
               echo Testing Image URL using wget
               wget -q -O - 127.0.0.1:3000/live | grep live
+
           - name: Docker Registry Push
             uses: docker/build-push-action@v4
             with:
@@ -156,6 +160,7 @@ jobs:
              tags: |
                abdelkarim3/solar-systems:${{ github.sha }}
                ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
+
     dev-deploy:
       if: contains(github.ref,'feature/')
       needs: docker
@@ -182,6 +187,7 @@ jobs:
             echo $URL
             echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
+
     Prod-deploy:
      if: github.ref == 'refs/heads/main'
      needs: docker

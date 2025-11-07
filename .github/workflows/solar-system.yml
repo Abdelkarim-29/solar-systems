@@ -52,9 +52,7 @@ jobs:
                  
         - name: Unit Testing
           id: nodejs-unit_testing-step
-          run: |
-            echo "🏁 Running Mocha tests..."
-            npm test || (echo "❌ Tests failed!" && cat test-results.xml && exit 1)
+          run: npm test
           
         - name: Archive Test Result
           if: always()
@@ -73,8 +71,8 @@ jobs:
             options: 
               --name mongo
         env:
-          MONGO_URI: 'mongodb+srv://mongo:27017/superData'    
-          MONGO_USERNAME: non-prod-username
+          MONGO_URI: 'mongodb://mongo:27017/superData'    
+          MONGO_USERNAME: non-prod-user
           MONGO_PASSWORD: non-prod-password           
         runs-on: ubuntu-latest
 

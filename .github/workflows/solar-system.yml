@@ -34,7 +34,7 @@ jobs:
         steps:
         - name: Debug Mongo URI
           run: |
-            صصecho "MONGO_URI value: $MONGO_URI"
+            ثقecho "MONGO_URI value: $MONGO_URI"
         - name: Checkout Repository
           uses: actions/checkout@v4
 

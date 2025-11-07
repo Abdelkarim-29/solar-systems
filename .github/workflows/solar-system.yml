@@ -168,7 +168,7 @@ jobs:
         k8s-kubeconfig: ${{ secrets.KUBECONFIG }}
         mongodb-password: ${{ secrets.MONGO_PASSWORD }}
       with:
-        mongo_uri: ${{ vars.MONGO_URI }} 
+        mongodb_uri: ${{ vars.MONGO_URI }} 
         environment: development 
         k8s-manifest-dir: kubernetes/development/
         namespace: development
@@ -195,7 +195,7 @@ jobs:
         k8s-kubeconfig: ${{ secrets.KUBECONFIG }}
         mongodb-password: ${{ secrets.MONGO_PASSWORD }}
      with:
-        mongo_uri: ${{ vars.MONGO_URI }} 
+        mongodb_uri: ${{ vars.MONGO_URI }} 
         environment: Production    
         kubernetes/development: kubernetes/production/
         namespace: production

@@ -9,7 +9,7 @@ on:
 env:
   MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'    
   MONGO_USERNAME: ${{vars.MONGO_USERNAME}}
-  MONGO_PASSWORD: ${{secrets.MONGO_PASSWORD}}
+  MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
     
 jobs:
     unit-testing:
@@ -19,9 +19,10 @@ jobs:
             image: siddharth67/mongo-db:non-prod
             ports:
               - 27017:27017
+    
         env:
-          MONGO_URI: 'mongodb+srv://localhost:27017/superData'    
-          MONGO_USERNAME: non-prod-username
+          MONGO_URI: 'mongodb://localhost:27017/superData'
+          MONGO_USERNAME: non-prod-user
           MONGO_PASSWORD: non-prod-password
         strategy:
           matrix:
@@ -48,7 +49,7 @@ jobs:
             
         - name: Install Dependencies
           run: npm install
-    
+                 
         - name: Unit Testing
           id: nodejs-unit_testing-step
           run: npm test
@@ -70,8 +71,8 @@ jobs:
             options: 
               --name mongo
         env:
-          MONGO_URI: 'mongodb+srv://mongo:27017/superData'    
-          MONGO_USERNAME: non-prod-username
+          MONGO_URI: 'mongodb://mongo:27017/superData'    
+          MONGO_USERNAME: non-prod-user
           MONGO_PASSWORD: non-prod-password           
         runs-on: ubuntu-latest
 
@@ -103,7 +104,7 @@ jobs:
                name: Code-Coverage-Result
                path: coverage
                retention-days: 5
-        
+
     reports-s3:
       needs: [unit-testing,code-coverage]  
       name: AWs S3 - Upload Artifact
@@ -130,7 +131,7 @@ jobs:
 
         - name: Upload to AWS S3    
           run: "Uploading............................"
-
+           
 
     docker:
        name: contaierization
@@ -176,6 +177,7 @@ jobs:
               echo $IP
               echo Testing Image URL using wget
               wget -q -O - 127.0.0.1:3000/live | grep live
+
           - name: Docker Registry Push
             uses: docker/build-push-action@v4
             with:
@@ -183,8 +185,8 @@ jobs:
              push: true
              tags: |
                abdelkarim3/solar-systems:${{ github.sha }}
-               ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }} 
-
+               ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
+               
     dev-deploy:
       if: contains(github.ref,'feature/')
       needs: docker
@@ -211,6 +213,7 @@ jobs:
             echo $URL
             echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
+
     Prod-deploy:
      if: github.ref == 'refs/heads/main'
      needs: docker
@@ -224,7 +227,6 @@ jobs:
         k8s-manifest-dir: kubernetes/production/
         namespace: production
 
-             
     Prod-integration-Testing:
       if: github.ref == 'refs/heads/main'
       name: Prod integration Testing    

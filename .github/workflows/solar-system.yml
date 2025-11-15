@@ -114,7 +114,8 @@ jobs:
         - name: Download Mocha Test Artifact   
           uses: actions/download-artifact@v4       
           with: 
-            name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_ststems }}-${{ github.run_number }}
+            pattern: Mocha-Test-Result-*
+            merge-multiple: true
 
         - name: Download Code Coverage Artifact   
           uses: actions/download-artifact@v4       

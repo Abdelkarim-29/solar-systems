@@ -105,6 +105,35 @@ jobs:
                path: coverage
                retention-days: 5
 
+    reports-s3:
+      needs: [unit-testing,code-coverage]  
+      name: AWs S3 - Upload Artifact
+      runs-on: ubuntu-latest
+      continue-on-error: true
+      steps:
+        - name: Download Mocha Test Artifact   
+          uses: actions/download-artifact@v4       
+          with: 
+            pattern: Mocha-Test-Result-*
+            merge-multiple: true
+
+        - name: Download Code Coverage Artifact   
+          uses: actions/download-artifact@v4       
+          with: 
+            name: Code-Coverage-Result      
+         
+        - name: Merge Test files
+          run: |
+            ls -ltr
+            mkdir reports-${{ github.sha }}    
+            mv cobertura-coverage.xml reports-${{ github.sha }}/
+            mv test-results.xml reports-${{ github.sha }}/
+            ls -ltr reports-${{ github.sha }}/
+
+        - name: Upload to AWS S3    
+          run: echo "Uploading............................"
+           
+
     docker:
        name: contaierization
        needs: [unit-testing, code-coverage]
@@ -158,6 +187,7 @@ jobs:
              tags: |
                abdelkarim3/solar-systems:${{ github.sha }}
                ghcr.io/abdelkarim-29/solar-systems:${{ github.sha }}   
+               
     dev-deploy:
       if: contains(github.ref,'feature/')
       needs: docker

@@ -131,7 +131,7 @@ jobs:
             ls -ltr reports-${{ github.sha }}/
 
         - name: Upload to AWS S3    
-          run: "Uploading............................"
+          run: echo "Uploading............................"
            
 
     docker:

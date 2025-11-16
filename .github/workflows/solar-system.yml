@@ -108,7 +108,7 @@ jobs:
     reports-s3:
       needs: [unit-testing,code-coverage]  
       name: AWs S3 - Upload Artifact
-      runs-on: self-hosted
+      runs-on: ubuntu-latest
       continue-on-error: true
       steps:
         - name: Download Mocha Test Artifact   

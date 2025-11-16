@@ -27,11 +27,11 @@ jobs:
         strategy:
           matrix:
            nodejs_version: [18,20] 
-           operating_ststems: [ubuntu-latest]
+           operating_systems: [ubuntu-latest]
            exclude:
              - nodejs_version: 18
-               operating_ststems: macos-latest
-        runs-on: ${{ matrix.operating_ststems }}
+               operating_systems: macos-latest
+        runs-on: ${{ matrix.operating_systems }}
         steps:
         - name: Checkout Repository
           uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
           if: always()
           uses: actions/upload-artifact@v4
           with:
-            name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_ststems }}-${{ github.run_number }}
+            name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_systems }}-${{ github.run_number }}
             path: test-results.xml
 
     code-coverage:
@@ -88,7 +88,7 @@ jobs:
           - name: cache NPM Dependencies
             uses: actions/cache@v3
             with:
-               path: mode_modules
+               path: node_modules
                key: ${{runner.os}}-node-modules-${{hashFiles('package-lock.json')}}   
 
           - name: Install Dependencies

@@ -130,6 +130,12 @@ jobs:
             mv test-results.xml reports-${{ github.sha }}/
             ls -ltr reports-${{ github.sha }}/
 
+        - name: Upload Report Folder as Artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: merged-reports
+            path: reports-${{ github.sha }}
+    
         - name: Upload to AWS S3    
           run: echo "Uploading............................"
            

@@ -27,11 +27,11 @@ jobs:
         strategy:
           matrix:
            nodejs_version: [18,20] 
-           operating_ststems: [ubuntu-latest]
+           operating_systems: [ubuntu-latest]
            exclude:
              - nodejs_version: 18
-               operating_ststems: macos-latest
-        runs-on: ${{ matrix.operating_ststems }}
+               operating_systems: macos-latest
+        runs-on: ${{ matrix.operating_systems }}
         steps:
         - name: Checkout Repository
           uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
           if: always()
           uses: actions/upload-artifact@v4
           with:
-            name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_ststems }}-${{ github.run_number }}
+            name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_systems }}-${{ github.run_number }}
             path: test-results.xml
 
     code-coverage:
@@ -88,7 +88,7 @@ jobs:
           - name: cache NPM Dependencies
             uses: actions/cache@v3
             with:
-               path: mode_modules
+               path: node_modules
                key: ${{runner.os}}-node-modules-${{hashFiles('package-lock.json')}}   
 
           - name: Install Dependencies
@@ -129,7 +129,12 @@ jobs:
             mv cobertura-coverage.xml reports-${{ github.sha }}/
             mv test-results.xml reports-${{ github.sha }}/
             ls -ltr reports-${{ github.sha }}/
-
+        - name: Upload Report Folder as Artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: merged-reports
+            path: reports-${{ github.sha }}
+    
         - name: Upload to AWS S3    
           run: echo "Uploading............................"
            
@@ -178,7 +183,6 @@ jobs:
               echo $IP
               echo Testing Image URL using wget
               wget -q -O - 127.0.0.1:3000/live | grep live
-
           - name: Docker Registry Push
             uses: docker/build-push-action@v4
             with:
@@ -214,7 +218,6 @@ jobs:
             echo $URL
             echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
-
     Prod-deploy:
      if: github.ref == 'refs/heads/main'
      needs: docker
@@ -239,5 +242,23 @@ jobs:
             URL: ${{  needs.Prod-deploy.outputs.application_url }}
           run: |
             echo $URL
-            echo "----------------------------------------------------------------"    
+            echo "---------------------------------------------------------------"    
             curl https://$URL/live -s -k | jq -r .status | grep -i live
+           
+    slackNotification:
+      if: always()
+      name: Slack Notification
+      needs: [Dev-integration-Testing,Prod-integration-Testing]
+      continue-on-error: true
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v4
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }} 
+          SLACK_CHANNEL: github-actions-channel
+          SLACK_COLOR: ${{ job.status }}    # or specific color like 'good' or  '#ff00ff'   
+          SLACK_ICON: https://gitlab.com/sidd-harth/solar-system/-/raw/main/images/saturn.png
+          SLACK_MESSAGE: ':hammer_and_wrench Triggered by ${{github.actor}}'
+          SLACK_TITLE: Information

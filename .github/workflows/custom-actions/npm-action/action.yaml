@@ -1,11 +1,11 @@
 name: 'NPM Custom Actions'
-description: 'Greet someone'
+description: 'Installing and Caching NPM Packages'
 inputs:
     path_of_folder:
        description: 'The path to cache'
        required: true
 runs:
-  using: "Installing and Caching NPM Packages"
+  using: "composite"
   steps:
     - name: cache NPM Dependencies
       uses: actions/cache@v3

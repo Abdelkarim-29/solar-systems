@@ -2,8 +2,8 @@ name: 'NPM Custom Actions'
 description: 'Greet someone'
 inputs:
     path_of_folder:
-    description: 'The path to cache'
-    required: true
+       description: 'The path to cache'
+       required: true
 runs:
   using: "Installing and Caching NPM Packages"
   steps:

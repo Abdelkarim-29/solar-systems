@@ -124,3 +124,5 @@ jobs:
           echo "Application URL: https://${{ steps.ingress-ip.outputs.APP_INGRESS_HOST }}"
    
     
+
+          

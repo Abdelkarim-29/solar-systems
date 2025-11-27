@@ -203,7 +203,7 @@ jobs:
       if: contains(github.ref,'feature/')
       name: Dev integration Testing    
       needs: dev-deploy
-      runs-on: self-hosted
+      runs-on: ubuntu-latest
       steps:
         - name: Test URL Output using CURL and JQ
           env:
@@ -230,7 +230,7 @@ jobs:
       if: github.ref == 'refs/heads/main'
       name: Prod integration Testing    
       needs: Prod-deploy
-      runs-on: self-hosted
+      runs-on: ubuntu-latest
       steps:
         - name: Test URL Output using CURL and JQ
           env:

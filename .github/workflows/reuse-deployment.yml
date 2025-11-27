@@ -67,8 +67,22 @@ jobs:
          kubectl version --client=true    
          echo ====================================
          kubectl get nodes
-           
 
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Add Ingress-NGINX Repo
+        run: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+      - name: Update Helm Repos
+        run: helm repo update
+
+      - name: Deploy NGINX Ingress Controller
+        run: |
+          helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+            --namespace ingress-nginx \
+            --create-namespace  
+           
       - name: Replace Token in Manifest files
         uses: cschleiden/replace-tokens@v1
         with:

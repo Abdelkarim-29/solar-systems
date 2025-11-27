@@ -193,6 +193,8 @@ jobs:
       secrets: 
         k8s-kubeconfig: ${{ secrets.KUBECONFIG }}
         mongodb-password: ${{ secrets.MONGO_PASSWORD }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       with:
         mongodb_uri: ${{ vars.MONGO_URI }} 
         environment: development 

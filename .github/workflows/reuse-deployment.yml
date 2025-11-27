@@ -127,4 +127,5 @@ jobs:
            echo "APP_INGRESS_HOST=$EXTERNAL_HOST" >> $GITHUB_OUTPUT
 
       - name: Output Application URL  
-        run: | echo "Application URL: https://${{ steps.set-ingress-host.outputs.APP_INGRESS_HOST }}"   
+        run: |
+          echo "Application URL: https://${{ steps.set-ingress-host.outputs.APP_INGRESS_HOST }}"   

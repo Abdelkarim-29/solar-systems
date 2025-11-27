@@ -109,24 +109,25 @@ jobs:
         run: |
            kubectl apply -f ${{ inputs.k8s-manifest-dir }}
 
-      - name: Wait for Service LoadBalancer Hostname
+      - name: Wait for Ingress Hostname
         id: set-ingress-host
         run: |
-          echo "Waiting for External Hostname..."
-          EXTERNAL_HOST=""
-          for i in {1..30}; do
-            EXTERNAL_HOST=$(kubectl -n ${{ inputs.namespace }} get svc solar-system -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-            if [ ! -z "$EXTERNAL_HOST" ]; then
-              break
-            fi
-            echo "Waiting 10s..."
-            sleep 10
-          done
-          if [ -z "$EXTERNAL_HOST" ]; then
-            echo "ERROR: External hostname not assigned"
-            exit 1
-          fi
-          echo "APP_INGRESS_HOST=$EXTERNAL_HOST" >> $GITHUB_OUTPUT
+         echo "Waiting for Ingress External Hostname..."
+         EXTERNAL_HOST=""
+         for i in {1..30}; do
+           EXTERNAL_HOST=$(kubectl -n ${{ inputs.namespace }} get ingress solar-system -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+           if [ ! -z "$EXTERNAL_HOST" ]; then
+             break
+           fi
+           echo "Waiting 10s..."
+           sleep 10
+         done
+         if [ -z "$EXTERNAL_HOST" ]; then
+           echo "ERROR: Ingress hostname not assigned"
+           exit 1
+         fi
+         echo "APP_INGRESS_HOST=$EXTERNAL_HOST" >> $GITHUB_OUTPUT
+
 
       - name: Output Application URL  
         run: |

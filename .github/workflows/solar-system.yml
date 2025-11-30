@@ -175,7 +175,7 @@ jobs:
               export IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' solar-systems-app)
               echo $IP
               echo Testing Image URL using wget
-              wget -q -O - $IP:3000/live | grep live
+              wget -q -O - 127.0.0.1:3000/live | grep live
 
           - name: Docker Registry Push
             uses: docker/build-push-action@v4
